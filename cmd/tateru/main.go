@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	"github.com/pavelc4/tateru/pkg/cli"
+)
 
 func main() {
-	fmt.Println("Tateru")
+	if err := cli.Run(os.Args[1:]); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 }
