@@ -1,0 +1,50 @@
+extends: ../../../gki/gki-5.10.yml
+
+device:
+  name: marble
+  platform: qcom
+  soc: sm7475
+
+kernel_source: kernel/msm-5.10
+devicetrees: kernel/msm-5.10/arch/arm64/boot/dts/qcom
+
+kernel:
+  version: "5.10"
+  localversion: "-marble"
+  defconfig:
+    base: vendor/marble_defconfig
+    fragments:
+      - arch/arm64/configs/vendor/marble_GKI.config
+    custom: []
+  config_overrides:
+    CONFIG_LOCALVERSION: '"-marble"'
+
+toolchain:
+  clang: Aosp
+  profile: performance
+  profiles:
+    performance:
+      extra_cflags:
+        - "-O3"
+        - "-march=armv8.2-a"
+      kbuild_ldflags: []
+
+ext_modules:
+  root: vendor/qcom/opensource
+  sources:
+    - audio-kernel
+    - camera-kernel
+    - display-drivers
+
+dtb:
+  wildcard: "sm7475*.dtb"
+  dtbo_wildcard: "sm7475*-overlay.dtbo"
+  techpack_dirs: []
+
+modules:
+  second_stage: "modules.order"
+  vendor_dlkm: "vendor_dlkm.img"
+
+output:
+  dist: out/dist/marble
+  zip: "AnyKernel3-marble-{version}.zip"

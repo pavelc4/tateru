@@ -46,7 +46,7 @@ func Run(args []string) error {
 
 	if err := fs.Parse(args); err != nil {
 		if err == flag.ErrHelp {
-			return nil // --help sudah print usage, exit clean
+			return nil
 		}
 		return err
 	}
@@ -77,14 +77,19 @@ func runBuild(opts Options) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	tc, err := toolchain.DetectClang(cfg.Toolchain.Clang)
-	if err != nil {
-		return fmt.Errorf("toolchain: %w", err)
-	}
-	env := tc.Env()
-
-	fmt.Printf("tateru  target=%s  clang=%s  dry-run=%v\n\n",
-		opts.Target, tc.ClangBin, opts.DryRun)
+	var env []string
+    if !opts.DryRun {
+        tc, err := toolchain.DetectClang(cfg.Toolchain.Clang)
+        if err != nil {
+            return fmt.Errorf("toolchain: %w", err)
+        }
+        env = tc.Env()
+        fmt.Printf("tateru  target=%s  clang=%s  dry-run=%v\n\n",
+            opts.Target, tc.ClangBin, opts.DryRun)
+    } else {
+        fmt.Printf("tateru  target=%s  clang=%s (dry-run, not verified)\n\n",
+            opts.Target, cfg.Toolchain.Clang)
+    }
 
 	g := dag.New()
 	g.Add(stages.NewDefconfig(cfg, env))

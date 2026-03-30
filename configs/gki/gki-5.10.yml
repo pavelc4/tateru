@@ -1,0 +1,23 @@
+gki:
+  version: "5.10"
+  base_defconfig: gki_defconfig
+  image: Image.gz
+  boot_header_version: 4
+  ramdisk_compression: lz4
+  has_init_boot: true
+  make_targets:
+    - Image.gz
+    - modules
+
+toolchain:
+  clang: clang
+  jobs: "$(nproc --all)"
+  flags:
+    ARCH: arm64
+    SUBARCH: arm64
+    LLVM: "1"
+    LLVM_IAS: "1"
+
+output:
+  dist: out/dist
+  zip: ""
