@@ -5,16 +5,18 @@ device:
   platform: qcom
   soc: sm7475
 
-kernel_source: kernel/msm-5.10
-devicetrees: kernel/msm-5.10/arch/arm64/boot/dts/qcom
+kernel_source: xiaomi/sm8450
+devicetrees: xiaomi/sm8450-devicetrees
 
 kernel:
-  version: "5.10"
-  localversion: "-marble"
   defconfig:
-    base: vendor/marble_defconfig
+    base: gki_defconfig
     fragments:
+      - arch/arm64/configs/vendor/waipio_GKI.config
+      - arch/arm64/configs/vendor/xiaomi_GKI.config
       - arch/arm64/configs/vendor/marble_GKI.config
+      - arch/arm64/configs/vendor/addon.config
+      - arch/arm64/configs/vendor/debugfs.config
     custom: []
   config_overrides:
     CONFIG_LOCALVERSION: '"-marble"'
@@ -30,11 +32,26 @@ toolchain:
       kbuild_ldflags: []
 
 ext_modules:
-  root: vendor/qcom/opensource
+  root: kernel/xiaomi/sm8450-modules
   sources:
-    - audio-kernel
-    - camera-kernel
-    - display-drivers
+    - qcom/opensource/mmrm-driver
+    - qcom/opensource/audio-kernel
+    - qcom/opensource/camera-kernel
+    - qcom/opensource/cvp-kernel
+    - qcom/opensource/dataipa/drivers/platform/msm
+    - qcom/opensource/datarmnet/core
+    - qcom/opensource/datarmnet-ext/aps
+    - qcom/opensource/datarmnet-ext/offload
+    - qcom/opensource/datarmnet-ext/shs
+    - qcom/opensource/datarmnet-ext/perf
+    - qcom/opensource/datarmnet-ext/perf_tether
+    - qcom/opensource/datarmnet-ext/sch
+    - qcom/opensource/datarmnet-ext/wlan
+    - qcom/opensource/display-drivers/msm
+    - qcom/opensource/eva-kernel
+    - qcom/opensource/video-driver
+    - qcom/opensource/wlan/qcacld-3.0/.qca6490
+    - qcom/opensource/wlan/qcacld-3.0/.qca6750
 
 dtb:
   wildcard: "sm7475*.dtb"
@@ -42,8 +59,9 @@ dtb:
   techpack_dirs: []
 
 modules:
-  second_stage: "modules.order"
-  vendor_dlkm: "vendor_dlkm.img"
+  first_stage: kernel/xiaomi/sm8450/modules.list.msm.waipio
+  second_stage: device/xiaomi/sm8450-common/modules.list.second_stage
+  vendor_dlkm: device/xiaomi/sm8450-common/modules.list.vendor_dlkm
 
 output:
   dist: out/dist/marble
