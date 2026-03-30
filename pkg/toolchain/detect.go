@@ -2,15 +2,14 @@ package toolchain
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 func DetectClang(override string) (*Env, error) {
-	bin := override
-	if bin == "" {
-		bin = "clang"
-	}
+	bin := resolveClangBin(override)
 
 	path, err := exec.LookPath(bin)
 	if err != nil {
@@ -23,6 +22,22 @@ func DetectClang(override string) (*Env, error) {
 	}
 
 	return &Env{ClangBin: path, Version: ver}, nil
+}
+
+func resolveClangBin(cfgOverride string) string {
+	if cfgOverride != "" {
+		return cfgOverride
+	}
+
+	if dir := os.Getenv("TATERU_CLANG"); dir != "" {
+		candidate := filepath.Join(dir, "clang")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+		return dir
+	}
+
+	return "clang"
 }
 
 func ClangVersion(bin string) (string, error) {

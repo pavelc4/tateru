@@ -20,7 +20,7 @@ kernel:
     CONFIG_LOCALVERSION: '"-marble"'
 
 toolchain:
-  clang: Aosp
+  clang: ""
   profile: performance
   profiles:
     performance:
