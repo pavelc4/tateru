@@ -10,44 +10,6 @@ import (
 	"github.com/pavelc4/tateru/pkg/config"
 )
 
-type BaseStage struct {
-	name string
-	deps []string
-	cfg  *config.BuildConfig
-	env  []string
-}
-
-func (b *BaseStage) Name() string   { return b.name }
-func (b *BaseStage) Deps() []string { return b.deps }
-
-func (b *BaseStage) make(targets ...string) error {
-	args := []string{
-		fmt.Sprintf("-j%d", numCPU()),
-		"O=out",
-		"ARCH=arm64",
-		"LLVM=1",
-		"LLVM_IAS=1",
-	}
-	args = append(args, targets...)
-
-	cmd := exec.Command("make", args...)
-	cmd.Dir = b.cfg.KernelSrc
-	cmd.Env = append(os.Environ(), b.env...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-func numCPU() int {
-	out, err := exec.Command("nproc", "--all").Output()
-	if err != nil {
-		return 4
-	}
-	n := 4
-	fmt.Sscanf(strings.TrimSpace(string(out)), "%d", &n)
-	return n
-}
-
 type DefconfigStage struct{ BaseStage }
 
 func NewDefconfig(cfg *config.BuildConfig, env []string) *DefconfigStage {
@@ -112,30 +74,4 @@ func (s *DefconfigStage) CacheInputs() []string {
 		inputs = append(inputs, filepath.Join(s.cfg.KernelSrc, frag))
 	}
 	return inputs
-}
-
-type KernelStage struct{ BaseStage }
-
-func NewKernel(cfg *config.BuildConfig, env []string) *KernelStage {
-	return &KernelStage{BaseStage{
-		name: "kernel",
-		deps: []string{"defconfig"},
-		cfg:  cfg,
-		env:  env,
-	}}
-}
-
-func (s *KernelStage) Run() error {
-	targets := s.cfg.GKI.MakeTargets
-	if len(targets) == 0 {
-		targets = []string{s.cfg.GKI.Image, "modules", "dtbs"}
-	}
-	fmt.Printf("  [kernel] targets=%s\n", strings.Join(targets, " "))
-	return s.make(targets...)
-}
-
-func (s *KernelStage) CacheInputs() []string {
-	return []string{
-		filepath.Join(s.cfg.KernelSrc, "Makefile"),
-	}
 }
